@@ -1,10 +1,13 @@
 package app.order.domain.order;
 
 import app.order.domain.customer.Customer;
-import app.order.domain.item.Item;
+
+import java.util.List;
 
 public record Order(
+        OrderNumber number,
+        OrderStatus status,
         Customer customer,
-        Item item
+        List<OrderDetails> details
 ) {
 }

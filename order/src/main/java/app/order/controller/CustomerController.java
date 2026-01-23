@@ -3,17 +3,17 @@ package app.order.controller;
 import app.order.domain.customer.ContactInfo;
 import app.order.domain.customer.Customer;
 import app.order.service.CustomerService;
+import app.order.config.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/customers")
 public class CustomerController {
     private final CustomerService service;
 
@@ -23,25 +23,16 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<List<Customer>> getAll() {
-        try {
-            var vs = service.getAll();
-            return vs.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(vs);
-        } catch (Exception e) {
-            // TODO: behandle exception
-            return ResponseEntity.internalServerError().build();
-        }
+        var vs = service.getAll();
+        if (vs.isEmpty()) throw new ResourceNotFoundException("No customers found");
+        return ResponseEntity.ok(vs);
     }
 
-    @GetMapping(params = "nr")
-    public ResponseEntity<Customer> find(@RequestParam("nr") String nr) {
-        try {
-            Optional<Customer> c = service.find(new ContactInfo.PhoneNumber(nr));
-            return c.map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            // TODO: behandle exception
-            return ResponseEntity.internalServerError().build();
-        }
+    @GetMapping("/{phoneNumber}")
+    public ResponseEntity<Customer> find(@PathVariable String phoneNumber) {
+        return service.find(new ContactInfo.PhoneNumber(phoneNumber))
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with phone: " + phoneNumber));
     }
 }
 

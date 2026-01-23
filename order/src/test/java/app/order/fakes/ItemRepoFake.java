@@ -1,21 +1,27 @@
 package app.order.fakes;
 
+import app.order.domain.item.Item;
 import app.order.entity.ItemEntity;
-import app.order.repository.item.ItemRepository;
+import app.order.repository.item.ItemRepo;
+import app.order.repository.item.ItemAdapter;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemRepositoryFake implements ItemRepository {
-    private final HashMap<Long, ItemEntity> db = new HashMap<>();
+public class ItemRepoFake implements ItemRepo {
+    private final LinkedHashMap<Long, ItemEntity> db = new LinkedHashMap<>();
 
     @Override
     public List<ItemEntity> findAll() {
         return db.values().stream().toList();
     }
 
-    // TODO: ikke fullt fungerende. Setter aldri PK
+    public void save(Item d) {
+        db.put(nextId(), ItemAdapter.toEntity(d));
+    }
+
+    @Override
     public ItemEntity save(ItemEntity e) {
         db.put(nextId(), e);
         return e;

@@ -4,6 +4,7 @@ import app.order.domain.item.Description;
 import app.order.domain.item.Item;
 import app.order.domain.item.ItemNumber;
 import app.order.domain.item.Name;
+import java.math.BigDecimal;
 import java.util.Random;
 
 public class ItemBuilder {
@@ -24,7 +25,7 @@ public class ItemBuilder {
         String itemNumber = generateRandomItemNumber();
         String name = generateRandomName();
         String description = generateRandomDescription();
-        double price = generateRandomPrice();
+        BigDecimal price = generateRandomPrice();
         int quantity = generateRandomQuantity();
 
         return new Item(
@@ -52,8 +53,9 @@ public class ItemBuilder {
         return ITEM_DESCRIPTIONS[random.nextInt(ITEM_DESCRIPTIONS.length)];
     }
 
-    private static double generateRandomPrice() {
-        return Math.round((10 + random.nextDouble() * 490) * 100.0) / 100.0;
+    private static BigDecimal generateRandomPrice() {
+        double price = 10 + random.nextDouble() * 490;
+        return BigDecimal.valueOf(price).setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
     private static int generateRandomQuantity() {

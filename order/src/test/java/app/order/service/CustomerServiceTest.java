@@ -1,6 +1,6 @@
 package app.order.service;
 
-import app.order.fakes.CustomerRepositoryFake;
+import app.order.fakes.CustomerRepoFake;
 import app.order.helper.CustomerBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ public class CustomerServiceTest {
     private final CustomerService service;
 
     public CustomerServiceTest() {
-        this.service = new CustomerService(new CustomerRepositoryFake());
+        this.service = new CustomerService(new CustomerRepoFake());
     }
 
     @Test

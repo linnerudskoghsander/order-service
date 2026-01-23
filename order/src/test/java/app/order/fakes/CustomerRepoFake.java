@@ -1,21 +1,27 @@
 package app.order.fakes;
 
+import app.order.domain.customer.Customer;
 import app.order.entity.CustomerEntity;
-import app.order.repository.customer.CustomerRepository;
+import app.order.repository.customer.CustomerRepo;
+import app.order.repository.customer.CustomerAdapter;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class CustomerRepositoryFake implements CustomerRepository {
-    private final HashMap<Long, CustomerEntity> db = new HashMap<>();
+public class CustomerRepoFake implements CustomerRepo {
+    private final LinkedHashMap<Long, CustomerEntity> db = new LinkedHashMap<>();
 
     @Override
     public List<CustomerEntity> findAll() {
         return db.values().stream().toList();
     }
 
-    // TODO: ikke fullt fungerende. Setter aldri PK
+    public void save(Customer d) {
+        db.put(nextId(), CustomerAdapter.toEntity(d));
+    }
+
+    @Override
     public CustomerEntity save(CustomerEntity e) {
         db.put(nextId(), e);
         return e;

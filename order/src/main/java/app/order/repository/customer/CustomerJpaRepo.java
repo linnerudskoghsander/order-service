@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import app.order.entity.CustomerEntity;
 
 @Repository
-public interface CustomerRepositoryImpl extends CustomerRepository, JpaRepository<CustomerEntity, Long> {
+public interface CustomerJpaRepo extends CustomerRepo, JpaRepository<CustomerEntity, Long> {
 }
 
 
