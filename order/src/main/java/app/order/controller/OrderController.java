@@ -23,5 +23,15 @@ public class OrderController {
         return ResponseEntity.ok(service.createOrder(req.customer(), req.orderDetails()));
     }
 
+    @GetMapping("/confirm")
+    public ResponseEntity<Order> confirmOrder(@RequestBody Order o) {
+        return ResponseEntity.ok(service.confirmOrder(o));
+    }
+
+    @GetMapping("/cancel")
+    public ResponseEntity<Order> cancelOrder(@RequestBody Order o) {
+        return ResponseEntity.ok(service.cancelOrder(o));
+    }
+
     public record CreateOrderRequest(Customer customer, List<OrderDetails> orderDetails) {}
 }

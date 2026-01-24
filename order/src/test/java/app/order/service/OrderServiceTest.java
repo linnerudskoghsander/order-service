@@ -1,6 +1,7 @@
 package app.order.service;
 
 import app.order.domain.order.OrderDetails;
+import app.order.domain.order.OrderStatus;
 import app.order.fakes.ItemRepoFake;
 import app.order.fakes.OrderDetailsRepoFake;
 import app.order.fakes.OrderRepoFake;
@@ -46,5 +47,30 @@ public class OrderServiceTest {
 
         assertEquals(1, ods.size());
         assertEquals(od.getFirst(), ods.getFirst());
+    }
+
+    @Test
+    void confirmOrder() {
+        var c = CustomerBuilder.Customer();
+        var i = ItemBuilder.Item();
+        var o = service.createOrder(c, List.of(new OrderDetails(i, 10)));
+
+        service.confirmOrder(o);
+
+        var co = service.findOrder(o.number());
+        assertEquals(OrderStatus.CONFIRMED, co.orElseThrow().status());
+    }
+
+    @Test
+    void cancelOrder() {
+        var c = CustomerBuilder.Customer();
+        var i = ItemBuilder.Item();
+        var o = service.createOrder(c, List.of(new OrderDetails(i, 10)));
+        var cfo = service.confirmOrder(o);
+
+        service.cancelOrder(cfo);
+
+        var co = service.findOrder(cfo.number());
+        assertEquals(OrderStatus.CANCELLED, co.orElseThrow().status());
     }
 }

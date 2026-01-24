@@ -20,17 +20,4 @@ public record Item(
         }
     }
 
-    public Item order(int amountOrdered) {
-        if ((quantityLeft-amountOrdered) < 0)
-            throw new OutOfStockException("Not enough in stock of item: %s. Tried to order %s, but was only %s left."
-                .formatted(name().value(), amountOrdered, quantityLeft()));
-
-        return new Item(
-                itemNumber,
-                name,
-                description,
-                price,
-                quantityLeft-amountOrdered
-        );
-    }
 }

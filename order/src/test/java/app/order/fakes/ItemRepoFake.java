@@ -2,6 +2,7 @@ package app.order.fakes;
 
 import app.order.domain.item.Item;
 import app.order.entity.ItemEntity;
+import app.order.entity.OrderDetailsEntity;
 import app.order.repository.item.ItemRepo;
 import app.order.repository.item.ItemAdapter;
 
@@ -23,7 +24,11 @@ public class ItemRepoFake implements ItemRepo {
 
     @Override
     public ItemEntity save(ItemEntity e) {
-        db.put(nextId(), e);
+        if (containsElement(e)) {
+            db.replace(getId(e), e);
+        } else {
+            db.put(nextId(), e);
+        }
         return e;
     }
 
@@ -32,6 +37,21 @@ public class ItemRepoFake implements ItemRepo {
         return db.values().stream()
                 .filter(e -> e.itemNumber().equals(itemNumber))
                 .findFirst();
+    }
+
+    private boolean containsElement(ItemEntity e) {
+        var o = db.values().stream()
+                .filter(v -> v.itemNumber().equals(e.itemNumber()))
+                .findFirst();
+        return o.isPresent();
+    }
+
+    private Long getId(ItemEntity e) {
+        return db.entrySet().stream()
+                .filter(x -> x.getValue().itemNumber().equals(e.itemNumber()))
+                .findFirst()
+                .orElseThrow()
+                .getKey();
     }
 
     private Long nextId() {

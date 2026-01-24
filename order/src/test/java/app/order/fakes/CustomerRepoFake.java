@@ -1,9 +1,7 @@
 package app.order.fakes;
 
-import app.order.domain.customer.Customer;
 import app.order.entity.CustomerEntity;
 import app.order.repository.customer.CustomerRepo;
-import app.order.repository.customer.CustomerAdapter;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,13 +15,13 @@ public class CustomerRepoFake implements CustomerRepo {
         return db.values().stream().toList();
     }
 
-    public void save(Customer d) {
-        db.put(nextId(), CustomerAdapter.toEntity(d));
-    }
-
     @Override
     public CustomerEntity save(CustomerEntity e) {
-        db.put(nextId(), e);
+        if (containsElement(e)) {
+            db.replace(getId(e), e);
+        } else {
+            db.put(nextId(), e);
+        }
         return e;
     }
 
@@ -34,10 +32,25 @@ public class CustomerRepoFake implements CustomerRepo {
                 .findFirst();
     }
 
+    private boolean containsElement(CustomerEntity e) {
+        var o = db.values().stream()
+                .filter(v -> v.phoneNumber().equals(e.phoneNumber()))
+                .findFirst();
+        return o.isPresent();
+    }
+
     private Long nextId() {
         return db.keySet().stream()
                 .mapToLong(Long::longValue)
                 .max()
                 .orElse(0L) + 1;
+    }
+
+    private Long getId(CustomerEntity e) {
+        return db.entrySet().stream()
+                .filter(x -> x.getValue().phoneNumber().equals(e.phoneNumber()))
+                .findFirst()
+                .orElseThrow()
+                .getKey();
     }
 }

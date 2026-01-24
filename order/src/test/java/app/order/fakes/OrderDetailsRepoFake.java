@@ -3,11 +3,11 @@ package app.order.fakes;
 import app.order.entity.OrderDetailsEntity;
 import app.order.repository.order.OrderDetailsRepo;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class OrderDetailsRepoFake implements OrderDetailsRepo {
-    private final HashMap<Long, OrderDetailsEntity> db = new HashMap<>();
+    private final LinkedHashMap<Long, OrderDetailsEntity> db = new LinkedHashMap<>();
 
     @Override
     public List<OrderDetailsEntity> findAll() {
@@ -16,7 +16,27 @@ public class OrderDetailsRepoFake implements OrderDetailsRepo {
 
     @Override
     public OrderDetailsEntity save(OrderDetailsEntity e) {
-        return db.put(nextId(), e);
+        if (containsElement(e)) {
+            db.replace(getId(e), e);
+        } else {
+            db.put(nextId(), e);
+        }
+        return e;
+    }
+
+    private Long getId(OrderDetailsEntity e) {
+        return db.entrySet().stream()
+                .filter(x -> x.getValue().equals(e))
+                .findFirst()
+                .orElseThrow()
+                .getKey();
+    }
+
+    private boolean containsElement(OrderDetailsEntity e) {
+        var o = db.values().stream()
+                .filter(v -> v.equals(e))
+                .findFirst();
+        return o.isPresent();
     }
 
     private Long nextId() {

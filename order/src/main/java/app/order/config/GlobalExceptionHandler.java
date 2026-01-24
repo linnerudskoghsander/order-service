@@ -62,4 +62,17 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Out of Stock");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problemDetail);
     }
+
+    @ExceptionHandler(OrderStatusException.class)
+    public ResponseEntity<ProblemDetail> handleWrongStateWhenChangingStatus(
+            OutOfStockException ex,
+            WebRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                ex.getMessage()
+        );
+        problemDetail.setType(URI.create("about:blank"));
+        problemDetail.setTitle("Order-status error");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problemDetail);
+    }
 }
