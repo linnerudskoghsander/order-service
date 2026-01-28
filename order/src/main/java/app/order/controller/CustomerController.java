@@ -24,7 +24,6 @@ public class CustomerController {
     @GetMapping
     public ResponseEntity<List<Customer>> getAll() {
         var vs = service.getAll();
-        if (vs.isEmpty()) throw new ResourceNotFoundException("No customers found");
         return ResponseEntity.ok(vs);
     }
 

@@ -1,22 +1,23 @@
 package app.order.repository.order;
 
+import app.order.domain.item.ItemNumber;
 import app.order.domain.order.OrderDetails;
 import app.order.entity.OrderDetailsEntity;
-import app.order.entity.OrderEntity;
-import app.order.repository.item.ItemAdapter;
 
 public class OrderDetailsAdapter {
 
     public static OrderDetails toDomain(OrderDetailsEntity e) {
         return new OrderDetails(
-                ItemAdapter.toDomain(e.item()),
+                new ItemNumber(e.itemNumber()),
+                e.unitPrice(),
                 e.amount()
         );
     }
 
     public static OrderDetailsEntity toEntity(OrderDetails d) {
         return new OrderDetailsEntity(
-                ItemAdapter.toEntity(d.item()),
+                d.itemNumber().value(),
+                d.priceAtPurchase(),
                 d.amount()
         );
     }

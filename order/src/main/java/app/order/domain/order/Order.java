@@ -2,7 +2,6 @@ package app.order.domain.order;
 
 import app.order.config.OrderStatusException;
 import app.order.domain.customer.Customer;
-import app.order.service.OrderNumberFactory;
 
 import java.util.List;
 
@@ -12,9 +11,9 @@ public record Order(
         Customer customer,
         List<OrderDetails> details
 ) {
-    public static Order create(Customer c, List<OrderDetails> ods) {
+    public static Order create(OrderNumber nr, Customer c, List<OrderDetails> ods) {
         return new Order(
-                OrderNumberFactory.getInstance().generate(),
+                nr,
                 OrderStatus.CREATED,
                 c,
                 ods
@@ -37,13 +36,13 @@ public record Order(
 
     public Order cancel() {
         return switch (this.status()) {
-            case CONFIRMED -> new Order(
+            case CREATED -> new Order(
                     number(),
                     OrderStatus.CANCELLED,
                     customer(),
                     details()
             );
-            case CANCELLED, CREATED -> throw new OrderStatusException(
+            case CANCELLED, CONFIRMED -> throw new OrderStatusException(
                     "Cannot cancel an order that got status %s".formatted(this.status())
             );
         };

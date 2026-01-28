@@ -24,7 +24,6 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<List<Item>> getAll() {
         var vs = service.getAll();
-        if (vs.isEmpty()) throw new ResourceNotFoundException("No items found");
         return ResponseEntity.ok(vs);
     }
 

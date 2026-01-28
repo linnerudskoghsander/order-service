@@ -3,6 +3,7 @@ package app.order.controller;
 import app.order.domain.customer.Customer;
 import app.order.domain.order.Order;
 import app.order.domain.order.OrderDetails;
+import app.order.domain.order.OrderNumber;
 import app.order.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +19,19 @@ public class OrderController {
         this.service = service;
     }
 
-    @PostMapping("/order")
+    @PostMapping()
     public ResponseEntity<Order> order(@RequestBody CreateOrderRequest req) {
         return ResponseEntity.ok(service.createOrder(req.customer(), req.orderDetails()));
     }
 
-    @GetMapping("/confirm")
-    public ResponseEntity<Order> confirmOrder(@RequestBody Order o) {
-        return ResponseEntity.ok(service.confirmOrder(o));
+    @PostMapping("/{orderNumber}/confirm")
+    public ResponseEntity<Order> confirmOrder(@PathVariable String orderNumber) {
+        return ResponseEntity.ok(service.confirmOrder(new OrderNumber(orderNumber)));
     }
 
-    @GetMapping("/cancel")
-    public ResponseEntity<Order> cancelOrder(@RequestBody Order o) {
-        return ResponseEntity.ok(service.cancelOrder(o));
+    @PostMapping("/{orderNumber}/cancel")
+    public ResponseEntity<Order> cancelOrder(@PathVariable String orderNumber) {
+        return ResponseEntity.ok(service.cancelOrder(new OrderNumber(orderNumber)));
     }
 
     public record CreateOrderRequest(Customer customer, List<OrderDetails> orderDetails) {}

@@ -1,5 +1,6 @@
 package app.order.service;
 
+import app.order.config.OutOfStockException;
 import app.order.config.ResourceNotFoundException;
 import app.order.domain.customer.Customer;
 import app.order.domain.order.Order;
@@ -34,15 +35,14 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(Customer c, List<OrderDetails> ds) {
-        // Oppdaterer Item slik at stock blir up-to-date
-        var updatedDs = ds.stream().map(d -> {
-            var updatedItem = d.order();
-            itemService.save(updatedItem);
-            return new OrderDetails(updatedItem, d.amount());
-        }).toList();
+        // Sjekk at amountOrdered ikke vil overgå stock på Item
+        ds.forEach(d -> {
+            var item = itemService.find(d.itemNumber()).orElseThrow();
+            if (d.amount() > item.quantityLeft()) throw new OutOfStockException("Amount (%s) can't exceed the stock quantity (%s)".formatted(d.amount(), item.quantityLeft()));
+        });
 
         // Oppretter Order, lagrer OrderEntity, og mapper OrderDetailsEntity til OrderEntity den tilhører
-        var order = Order.create(c, updatedDs);
+        var order = Order.create(OrderNumberFactory.getInstance().generate(), c, ds);
         OrderEntity entity = OrderAdapter.toEntity(order);
         orderRepo.save(entity);
 
@@ -74,8 +74,19 @@ public class OrderService {
         ).toList();
     }
 
-    public Order confirmOrder(Order o) {
-        var confirmedOrder = o.confirm();
+    @Transactional
+    public Order confirmOrder(OrderNumber nr) {
+        var o = orderRepo.findByOrderNumber(nr.value()).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find order with the ordernumber %s".formatted(nr.value()))
+        );
+        var confirmedOrder = OrderAdapter.toDomain(o).confirm();
+
+        // Reduserer stock quantity på Items og oppdaterer DB
+        confirmedOrder.details().forEach(od -> {
+            var item = itemService.find(od.itemNumber()).orElseThrow();
+            var ui = item.reduceQuantity(od.amount());
+            itemService.save(ui);
+        });
         orderRepo.save(OrderAdapter.toEntity(confirmedOrder));
         return confirmedOrder;
     }
@@ -86,13 +97,11 @@ public class OrderService {
     }
 
     @Transactional
-    public Order cancelOrder(Order o) {
-        var cancelledOrder = o.cancel();
-        // Reversere stock-infoen på items og oppdater OrderDetails-tabell i DB
-        cancelledOrder.details().forEach(d -> {
-            var i = d.cancelOrder();
-            orderDetailsRepo.save(OrderDetailsAdapter.toEntity(new OrderDetails(i, d.amount())));
-        });
+    public Order cancelOrder(OrderNumber nr) {
+        var o = orderRepo.findByOrderNumber(nr.value()).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find order with the ordernumber %s".formatted(nr.value()))
+        );
+        var cancelledOrder = OrderAdapter.toDomain(o).cancel();
         // Oppdaterer Order-tabell i DB
         orderRepo.save(OrderAdapter.toEntity(cancelledOrder));
         return cancelledOrder;

@@ -2,6 +2,8 @@ package app.order.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "order_details")
 public class OrderDetailsEntity {
@@ -13,17 +15,20 @@ public class OrderDetailsEntity {
     @JoinColumn(name = "order_id")
     private OrderEntity order;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "item_id")
-    private ItemEntity item;
+    @Column(name = "item_number", nullable = false, length = 64)
+    private String itemNumber;
+
+    @Column(name = "unit_price", nullable = false, precision = 19, scale = 2)
+    private BigDecimal unitPrice;
 
     @Column(nullable = false)
     private int amount;
 
     protected OrderDetailsEntity() {}
 
-    public OrderDetailsEntity(ItemEntity item, int amount) {
-        this.item = item;
+    public OrderDetailsEntity(String itemNumber, BigDecimal unitPrice, int amount) {
+        this.itemNumber = itemNumber;
+        this.unitPrice = unitPrice;
         this.amount = amount;
     }
 
@@ -35,8 +40,12 @@ public class OrderDetailsEntity {
         return order;
     }
 
-    public ItemEntity item() {
-        return item;
+    public String itemNumber() {
+        return itemNumber;
+    }
+
+    public BigDecimal unitPrice() {
+        return unitPrice;
     }
 
     public int amount() {

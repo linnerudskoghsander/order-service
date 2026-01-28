@@ -65,7 +65,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderStatusException.class)
     public ResponseEntity<ProblemDetail> handleWrongStateWhenChangingStatus(
-            OutOfStockException ex,
+            OrderStatusException ex,
             WebRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.CONFLICT,

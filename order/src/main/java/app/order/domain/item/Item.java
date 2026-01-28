@@ -1,7 +1,5 @@
 package app.order.domain.item;
 
-import app.order.config.OutOfStockException;
-
 import java.math.BigDecimal;
 
 public record Item(
@@ -18,6 +16,18 @@ public record Item(
         if (quantityLeft < 0) {
             throw new IllegalArgumentException("Quantity left cannot be below 0: %s".formatted(quantityLeft));
         }
+    }
+
+    public Item reduceQuantity(int n) {
+        int newQuantity = quantityLeft - n;
+        if (newQuantity < 0) throw new IllegalArgumentException("Quantity left cannot be below 0: %s".formatted(newQuantity));
+        return new Item(
+                itemNumber,
+                name,
+                description,
+                price,
+                newQuantity
+        );
     }
 
 }
